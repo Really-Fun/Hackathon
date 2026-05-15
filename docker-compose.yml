@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    # Прокидываем порты
+    ports:
+      - "8080:8080"
+    # Прокидываем папку с кодом внутрь контейнера (чтобы работал авторестарт при сохранении файлов)
+    volumes:
+      - ./backend:/app
+    # Твой manage.py лежит в подпапке hackathon
+    working_dir: /app/hackathon
+    command: python manage.py runserver 0.0.0.0:8080
+
+  frontend:
+    build:
+      context: ./frontend/tbank-front
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/tbank-front:/app
+      # Изолируем node_modules контейнера от твоей локальной системы
+      - /app/node_modules
+    environment:
+      # Сразу задаем URL бэкенда для фронтенда
+      - VITE_API_URL=http://localhost:8080/api/
+    command: npm run dev -- --host
